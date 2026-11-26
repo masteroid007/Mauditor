@@ -1,14 +1,17 @@
+
 import argparse
 from collections import Counter
 from pathlib import Path
-from colored_print import log
 from time import perf_counter
+
+from colored_print import log
 
 from mauditor import __version__
 from mauditor.core.auditor import Auditor
 from mauditor.core.models import Finding, Severity
 from mauditor.core.rules.registry import Registry
 from mauditor.cli.formatting import hyperlink
+from mauditor.core.report import Report
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -45,14 +48,15 @@ def create_parser() -> argparse.ArgumentParser:
         version=f"%(prog)s {__version__}",
         help="Show the program's version number and exit.",
     )
-    
+
     parser.add_argument(
         "--rules",
         action="store_true",
-        help="Show available security rules",
+        help="Show available security rules.",
     )
 
     return parser
+
 
 def print_rules() -> None:
     registry = Registry.default()
@@ -65,12 +69,16 @@ def print_rules() -> None:
         registry.get_all_rules().items()
     ):
         rule = rule_class()
-        log.info(f"{rule_id:<10} | {rule.__class__.__name__:<40} | Severity: {rule.severity.name:<8}")
+
+        log.info(
+            f"{rule_id:<10} | "
+            f"{rule.__class__.__name__:<40} | "
+            f"Severity: {rule.severity.name:<8}"
+        )
 
     log.pink("=" * 80)
-    log.success(
-        f"Total rules: {len(registry.get_all_rules())}"
-    )
+    log.success(f"Total rules: {len(registry.get_all_rules())}")
+
 
 def print_header(target: Path) -> None:
     log.pink("=" * 60)
@@ -81,12 +89,13 @@ def print_header(target: Path) -> None:
     log.info(f"Target:  {target.resolve()}")
     log.success("\nStarting security analysis...\n")
 
+
 def print_finding(index: int, finding: Finding) -> None:
     location = hyperlink(
-    f"{finding.file_path}",
-    Path(finding.file_path)
+        str(finding.file_path),
+        Path(finding.file_path)
     )
-    
+
     log("-" * 60)
 
     log.info(f"Finding #{index}")
@@ -110,8 +119,10 @@ def print_finding(index: int, finding: Finding) -> None:
         log.info(severity_message)
 
 
-
-def print_summary(findings: list[Finding], start_time: float) -> None:
+def print_summary(
+    findings: list[Finding],
+    scan_duration: float
+) -> None:
     log("\n" + "=" * 60)
     log.pink("  SCAN SUMMARY")
     log("=" * 60)
@@ -137,20 +148,19 @@ def print_summary(findings: list[Finding], start_time: float) -> None:
     log("=" * 60)
 
     if total == 0:
-        log.success("No findings found. Your scan completed successfully.")
+        log.success(
+            "No findings found. Your scan completed successfully."
+        )
     else:
         log.warning(f"Scan completed with {total} finding(s).")
 
-
-    end_time = perf_counter()
-    log.info(f"Scan time: {end_time - start_time:.2f} seconds")
+    log.info(f"Scan time: {scan_duration:.2f} seconds")
 
 
 def main() -> int:
-    start_time = perf_counter()
     parser = create_parser()
     args = parser.parse_args()
-    
+
     if args.rules:
         print_rules()
         return 0
@@ -158,13 +168,18 @@ def main() -> int:
     target = args.target
 
     if target is None:
-        parser.error("Target path is required. Please specify a directory to analyze.")
-    
+        parser.error(
+            "Target path is required. "
+            "Please specify a directory to analyze."
+        )
+
     if not target.exists():
         parser.error(f"Target does not exist: {target}")
 
     if not target.is_dir():
         parser.error(f"Target is not a directory: {target}")
+
+    start_time = perf_counter()
 
     print_header(target)
 
@@ -173,6 +188,18 @@ def main() -> int:
     for index, finding in enumerate(findings, start=1):
         print_finding(index, finding)
 
-    print_summary(findings, start_time)
+    scan_duration = perf_counter() - start_time
+
+    print_summary(findings, scan_duration)
+
+    report = Report(
+        findings=findings,
+        scan_duration=scan_duration,
+        directory=str(target.resolve()),
+    )
+
+    report_path = report.write_json("reports")
+
+    log.success(f"Report generated: {report_path}")
 
     return 1 if findings else 0
