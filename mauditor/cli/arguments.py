@@ -27,7 +27,8 @@ def create_parser() -> argparse.ArgumentParser:
             "  maudit ./my-project\n"
             "  maudit /path/to/project\n"
             "  maudit --version\n"
-            "  maudit --rules\n\n"
+            "  maudit --rules\n"
+            "  maudit --noreport ./my-project\n\n"
             "Project:\n"
             "  https://github.com/masteroid007/MasterAuditor"
         ),
@@ -53,6 +54,12 @@ def create_parser() -> argparse.ArgumentParser:
         "--rules",
         action="store_true",
         help="Show available security rules.",
+    )
+    
+    parser.add_argument(
+        "--noreport",
+        action="store_true",
+        help="Do not generate a report file.",
     )
 
     return parser
@@ -192,14 +199,15 @@ def main() -> int:
 
     print_summary(findings, scan_duration)
 
-    report = Report(
-        findings=findings,
-        scan_duration=scan_duration,
-        directory=str(target.resolve()),
-    )
+    if not args.noreport:
+        report = Report(
+            findings=findings,
+            scan_duration=scan_duration,
+            directory=str(target.resolve()),
+        )
 
-    report_path = report.write_json("reports")
+        report_path = report.write_json("reports")
 
-    log.success(f"Report generated: {report_path}")
+        log.success(f"Report generated: {report_path}")
 
     return 1 if findings else 0
