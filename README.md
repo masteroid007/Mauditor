@@ -1,8 +1,8 @@
-# MasterAuditor
+# Mauditor
 
 **A modular security auditing tool for Python projects.**
 
-MasterAuditor is an open-source command-line tool designed to analyze Python codebases and identify potential security issues through static analysis.
+Mauditor is an open-source command-line tool designed to analyze Python codebases and identify potential security issues through static analysis.
 
 Its modular architecture makes security checks extensible, maintainable, and easy to integrate into developer workflows.
 
@@ -16,11 +16,12 @@ Its modular architecture makes security checks extensible, maintainable, and eas
 - **Modular Architecture** — Extensible rule system with a centralized registry and dedicated rules engine.
 - **Structured Findings** — Report security issues with file locations, line numbers, and severity levels.
 - **Severity Classification** — Categorize findings from informational to critical.
+- **JSON Report Generation** — Generate structured reports containing scan metadata, severity summaries, and detailed findings.
 - **Command-Line Interface** — Run security audits directly from your terminal.
 
 ## Security Checks
 
-MasterAuditor currently focuses on two main categories:
+Mauditor currently focuses on two main categories:
 
 ### Code Execution & Injection
 
@@ -52,7 +53,7 @@ Detects potentially exposed sensitive information, including:
 Clone the repository:
 
 ```bash
-git clone https://github.com/masteroid007/MasterAuditor.git
+git clone https://github.com/masteroid007/Mauditor.git
 cd MasterAuditor
 ```
 
@@ -62,7 +63,7 @@ Create and activate a virtual environment:
 python -m venv .venv
 ```
 
-Install MasterAuditor:
+Install Mauditor:
 
 ```bash
 python -m pip install -e .
@@ -82,7 +83,7 @@ Check the installed version:
 maudit --version
 ```
 
-See all the rules available:
+Display all available security rules:
 
 ```bash
 maudit --rules
@@ -94,14 +95,32 @@ Analyze a Python project:
 maudit ./my-project
 ```
 
+## JSON Reports
+
+Mauditor automatically generates a JSON report after each scan.
+
+Reports are saved in:
+
+```text
+reports/
+└── report.json
+```
+
+Each report contains three main sections:
+
+- **Metadata** — Tool name, version, generation timestamp, target directory, and scan duration.
+- **Summary** — Total number of findings and counts grouped by severity.
+- **Findings** — Detailed information about each detected issue, including rule ID, category, CWE ID, message, file location, line number, and severity.
+
 ## Project Architecture
 
-MasterAuditor follows a modular architecture built around four main components:
+Mauditor follows a modular architecture built around five main components:
 
 - **Scanner** — Discovers Python files in the target directory.
 - **Analysis Engine** — Parses source files and extracts structural information through AST analysis.
 - **Rules Engine** — Executes registered security rules against analyzed data.
 - **Auditor** — Coordinates the scanning, analysis, and rule evaluation workflow.
+- **Report** — Generates structured JSON reports from scan results.
 
 This separation of responsibilities makes the project easier to extend and maintain.
 
@@ -113,7 +132,7 @@ If you want to contribute, feel free to fork the repository and submit a pull re
 
 ## Disclaimer
 
-MasterAuditor is a static analysis tool intended to help identify potential security issues in Python projects.
+Mauditor is a static analysis tool intended to help identify potential security issues in Python projects.
 
 Its findings should be reviewed by developers and security professionals. It does not guarantee the detection of every vulnerability.
 
