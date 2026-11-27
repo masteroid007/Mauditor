@@ -7,12 +7,7 @@ from mauditor.config.validator import validate_config
 
 DEFAULT_CONFIG = """\
 [scanner]
-exclude = [
-    "__pycache__",
-    ".venv",
-    "venv",
-    ".git"
-]
+exclude = []
 
 [rules]
 disabled = []
@@ -21,24 +16,30 @@ disabled = []
 minimum = "LOW"
 
 [report]
-enabled = True
+enabled = true
 output = "reports/report.json"
 
 [output]
-colors = True
-show_summary = True 
+colors = true
+show_summary = true
 """
 # summary fatto
 # report fatto
+# report path fatto
 
 def get_config() -> dict:
     if not CONFIG_PATH.exists():
         CONFIG_DIR.mkdir(parents=True, exist_ok=True)
         CONFIG_PATH.write_text(DEFAULT_CONFIG, encoding="utf-8")
 
-    with CONFIG_PATH.open("rb") as file:
-        config = tomllib.load(file)
-    
+    try:
+        with CONFIG_PATH.open("rb") as file:
+            config = tomllib.load(file)
+
+    except tomllib.TOMLDecodeError as error:
+        raise ValueError(
+            f"Invalid TOML configuration: {error}"
+        ) from error
+
     validate_config(config)
     return config
-    

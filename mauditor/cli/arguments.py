@@ -206,7 +206,7 @@ def main() -> int:
         report = Report(
             findings=findings,
             scan_duration=scan_duration,
-            directory=str(target.resolve()),
+            directory=str(target.resolve())
         )
 
         report_path = report.write_json("reports")

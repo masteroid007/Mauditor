@@ -5,6 +5,7 @@ from collections import Counter
 from pathlib import Path
 
 from mauditor import __version__
+from mauditor.config.defaults import get_config
 
 
 class Report:
@@ -76,10 +77,11 @@ class Report:
         }
 
     def write_json(self, directory: str) -> str:
-        output_dir = Path(directory)
-        output_dir.mkdir(parents=True, exist_ok=True)
+        report_path = Path(
+            get_config().get("report", {}).get("output", "reports/report.json")
+        )
 
-        report_path = output_dir / "report.json"
+        report_path.parent.mkdir(parents=True, exist_ok=True)
 
         with report_path.open("w", encoding="utf-8") as file:
             json.dump(
