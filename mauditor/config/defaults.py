@@ -10,7 +10,7 @@ DEFAULT_CONFIG = """\
 disabled = []
 
 [severity]
-minimum = "LOW"
+minimum = "ALL"
 
 [report]
 enabled = true

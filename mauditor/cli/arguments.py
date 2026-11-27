@@ -131,8 +131,8 @@ def print_header(target: Path) -> None:
 def print_finding(index: int, finding: Finding) -> None:
     config = get_config()
     location = hyperlink(
-    str(finding.file_path),
-    Path(finding.file_path)
+        str(finding.file_path),
+        Path(finding.file_path)
         )
     if config.get("output", {}).get("colors", True):
         log("-" * 60)
@@ -216,6 +216,8 @@ def print_summary(
             )
         else:
             log.warning(f"Scan completed with {total} finding(s).")
+        
+        log.info(f"All findings have been filtered starting from {config.get("severity", {}).get("minimum")}")
 
         log.info(f"Scan time: {scan_duration:.2f} seconds")
     else:
@@ -249,6 +251,8 @@ def print_summary(
             )
         else:
             print(f"Scan completed with {total} finding(s).")
+        
+        print(f"All findings have been filtered starting from {config.get("severity", {}).get("minimum")}")
 
         print(f"Scan time: {scan_duration:.2f} seconds")
 
@@ -283,7 +287,14 @@ def main() -> int:
     findings = Auditor().run(target)
 
     for index, finding in enumerate(findings, start=1):
-        print_finding(index, finding)
+        if config.get("severity", {}).get("minimum", "LOW"):
+            print_finding(index, finding)
+        elif config.get("severity", {}).get("minimum", "MEDIUM") and str(finding.severity) in ["MEDIUM", "HIGH", "CRITICAL"]:
+            print_finding(index, finding)
+        elif config.get("severity", {}).get("minimum", "HIGH") and str(finding.severity) in ["HIGH", "CRITICAL"]:
+            print_finding(index, finding)
+        elif config.get("severity", {}).get("minimum", "CRITICAL") and str(finding.severity) in ["CRITICAL"]:
+            print_finding(index, finding)
 
     scan_duration = perf_counter() - start_time
 
