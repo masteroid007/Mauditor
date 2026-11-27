@@ -6,23 +6,10 @@ def validate_config(config: dict) -> None:
     if not isinstance(config, dict):
         raise TypeError("Configuration must be a dictionary.")
 
-    validate_scanner(config.get("scanner", {}))
     validate_rules(config.get("rules", {}))
     validate_severity(config.get("severity", {}))
     validate_report(config.get("report", {}))
     validate_output(config.get("output", {}))
-
-
-def validate_scanner(scanner: dict) -> None:
-    if not isinstance(scanner, dict):
-        raise TypeError("'scanner' must be a table.")
-
-    if "exclude" in scanner:
-        if not isinstance(scanner["exclude"], list):
-            raise TypeError("'scanner.exclude' must be a list.")
-
-        if not all(isinstance(item, str) for item in scanner["exclude"]):
-            raise TypeError("'scanner.exclude' must contain only strings.")
 
 
 def validate_rules(rules: dict) -> None:

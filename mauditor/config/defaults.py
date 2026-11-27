@@ -6,9 +6,6 @@ from mauditor.config.validator import validate_config
 
 
 DEFAULT_CONFIG = """\
-[scanner]
-exclude = []
-
 [rules]
 disabled = []
 
@@ -23,9 +20,8 @@ output = "reports/report.json"
 colors = true
 show_summary = true
 """
-# summary fatto
+# output fatto
 # report fatto
-# report path fatto
 
 def get_config() -> dict:
     if not CONFIG_PATH.exists():

@@ -69,100 +69,188 @@ def create_parser() -> argparse.ArgumentParser:
 def print_rules() -> None:
     registry = Registry.default()
 
-    log.pink("=" * 80)
-    log.pink("  AVAILABLE SECURITY RULES")
-    log.pink("=" * 80)
+    config = get_config()
+    if config.get("output", {}).get("colors", True):
+        log.pink("=" * 80)
+        log.pink("  AVAILABLE SECURITY RULES")
+        log.pink("=" * 80)
 
-    for rule_id, rule_class in sorted(
-        registry.get_all_rules().items()
-    ):
-        rule = rule_class()
+        for rule_id, rule_class in sorted(
+            registry.get_all_rules().items()
+        ):
+            rule = rule_class()
 
-        log.info(
-            f"{rule_id:<10} | "
-            f"{rule.__class__.__name__:<40} | "
-            f"Severity: {rule.severity.name:<8}"
-        )
+            log.info(
+                f"{rule_id:<10} | "
+                f"{rule.__class__.__name__:<40} | "
+                f"Severity: {rule.severity.name:<8}"
+            )
 
-    log.pink("=" * 80)
-    log.success(f"Total rules: {len(registry.get_all_rules())}")
+        log.pink("=" * 80)
+        log.success(f"Total rules: {len(registry.get_all_rules())}")
+    else:
+        print("=" * 80)
+        print("  AVAILABLE SECURITY RULES")
+        print("=" * 80)
+        
+        for rule_id, rule_class in sorted(
+            registry.get_all_rules().items()
+        ):
+            rule = rule_class()
+        
+            print(
+                f"{rule_id:<10} | "
+                f"{rule.__class__.__name__:<40} | "
+                f"Severity: {rule.severity.name:<8}"
+            )
+        
+        print("=" * 80)
+        print(f"Total rules: {len(registry.get_all_rules())}")
 
 
 def print_header(target: Path) -> None:
-    log.pink("=" * 60)
-    log.pink("  MAUDITOR - PYTHON SECURITY AUDITOR")
-    log.pink("=" * 60)
+    config = get_config()
+    if config.get("output", {}).get("colors", True):
+        log.pink("=" * 60)
+        log.pink("  MAUDITOR - PYTHON SECURITY AUDITOR")
+        log.pink("=" * 60)
 
-    log.info(f"Version: {__version__}")
-    log.info(f"Target:  {target.resolve()}")
-    log.success("\nStarting security analysis...\n")
+        log.info(f"Version: {__version__}")
+        log.info(f"Target:  {target.resolve()}")
+        log.success("\nStarting security analysis...\n")
+    else:
+        print("=" * 60)
+        print("  MAUDITOR - PYTHON SECURITY AUDITOR")
+        print("=" * 60)
+
+        print(f"Version: {__version__}")
+        print(f"Target:  {target.resolve()}")
+        print("\nStarting security analysis...\n")
 
 
 def print_finding(index: int, finding: Finding) -> None:
+    config = get_config()
     location = hyperlink(
-        str(finding.file_path),
-        Path(finding.file_path)
-    )
+    str(finding.file_path),
+    Path(finding.file_path)
+        )
+    if config.get("output", {}).get("colors", True):
+        log("-" * 60)
 
-    log("-" * 60)
+        log.info(f"Finding #{index}")
+        log(f"Rule ID:  {finding.rule_id}")
+        log(f"Category: {finding.category}")
+        log(f"CWE ID:   {finding.cwe_id}")
+        log(f"Message:  {finding.message}")
+        log(f"Location: {location}")
+        log(f"Line:     {finding.line}")
 
-    log.info(f"Finding #{index}")
-    log(f"Rule ID:  {finding.rule_id}")
-    log(f"Category: {finding.category}")
-    log(f"CWE ID:   {finding.cwe_id}")
-    log(f"Message:  {finding.message}")
-    log(f"Location: {location}")
-    log(f"Line:     {finding.line}")
+        severity = finding.severity
+        severity_message = f"Severity: {severity.name}"
 
-    severity = finding.severity
-    severity_message = f"Severity: {severity.name}"
-
-    if severity == Severity.CRITICAL:
-        log.critical(severity_message)
-    elif severity == Severity.HIGH:
-        log.error(severity_message)
-    elif severity == Severity.MEDIUM:
-        log.warning(severity_message)
+        if severity == Severity.CRITICAL:
+            log.critical(severity_message)
+        elif severity == Severity.HIGH:
+            log.error(severity_message)
+        elif severity == Severity.MEDIUM:
+            log.warning(severity_message)
+        else:
+            log.info(severity_message)
     else:
-        log.info(severity_message)
+        print("-" * 60)
+
+        print(f"Finding #{index}")
+        print(f"Rule ID:  {finding.rule_id}")
+        print(f"Category: {finding.category}")
+        print(f"CWE ID:   {finding.cwe_id}")
+        print(f"Message:  {finding.message}")
+        print(f"Location: {location}")
+        print(f"Line:     {finding.line}")
+
+        severity = finding.severity
+        severity_message = f"Severity: {severity.name}"
+
+        if severity == Severity.CRITICAL:
+            print(severity_message)
+        elif severity == Severity.HIGH:
+            print(severity_message)
+        elif severity == Severity.MEDIUM:
+            print(severity_message)
+        else:
+            print(severity_message)
 
 
 def print_summary(
     findings: list[Finding],
     scan_duration: float
 ) -> None:
-    log("\n" + "=" * 60)
-    log.pink("  SCAN SUMMARY")
-    log("=" * 60)
+    config = get_config()
+    if config.get("output", {}).get("colors", True):
+        log("\n" + "=" * 60)
+        log.pink("  SCAN SUMMARY")
+        log("=" * 60)
 
-    total = len(findings)
-    log(f"Total findings: {total}")
+        total = len(findings)
+        log(f"Total findings: {total}")
 
-    counts = Counter(finding.severity for finding in findings)
+        counts = Counter(finding.severity for finding in findings)
 
-    for severity in Severity:
-        count = counts.get(severity, 0)
-        message = f"{severity.name:<10}: {count}"
+        for severity in Severity:
+            count = counts.get(severity, 0)
+            message = f"{severity.name:<10}: {count}"
 
-        if severity == Severity.CRITICAL:
-            log.critical(message)
-        elif severity == Severity.HIGH:
-            log.error(message)
-        elif severity == Severity.MEDIUM:
-            log.warning(message)
+            if severity == Severity.CRITICAL:
+                log.critical(message)
+            elif severity == Severity.HIGH:
+                log.error(message)
+            elif severity == Severity.MEDIUM:
+                log.warning(message)
+            else:
+                log.info(message)
+
+        log("=" * 60)
+
+        if total == 0:
+            log.success(
+                "No findings found. Your scan completed successfully."
+            )
         else:
-            log.info(message)
+            log.warning(f"Scan completed with {total} finding(s).")
 
-    log("=" * 60)
-
-    if total == 0:
-        log.success(
-            "No findings found. Your scan completed successfully."
-        )
+        log.info(f"Scan time: {scan_duration:.2f} seconds")
     else:
-        log.warning(f"Scan completed with {total} finding(s).")
+        print("\n" + "=" * 60)
+        print("  SCAN SUMMARY")
+        print("=" * 60)
 
-    log.info(f"Scan time: {scan_duration:.2f} seconds")
+        total = len(findings)
+        print(f"Total findings: {total}")
+
+        counts = Counter(finding.severity for finding in findings)
+
+        for severity in Severity:
+            count = counts.get(severity, 0)
+            message = f"{severity.name:<10}: {count}"
+
+            if severity == Severity.CRITICAL:
+                print(message)
+            elif severity == Severity.HIGH:
+                print(message)
+            elif severity == Severity.MEDIUM:
+                print(message)
+            else:
+                print(message)
+
+        print("=" * 60)
+
+        if total == 0:
+            print(
+                "No findings found. Your scan completed successfully."
+            )
+        else:
+            print(f"Scan completed with {total} finding(s).")
+
+        print(f"Scan time: {scan_duration:.2f} seconds")
 
 
 def main() -> int:
@@ -211,6 +299,9 @@ def main() -> int:
 
         report_path = report.write_json("reports")
 
+    if config.get("report", {}).get("enabled", True) and config.get("output", {}).get("colors", True):
         log.success(f"Report generated: {report_path}")
+    elif config.get("report", {}).get("enabled", True):
+        print(f"Report generated: {report_path}")
 
     return 1 if findings else 0
