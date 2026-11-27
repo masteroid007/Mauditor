@@ -12,6 +12,7 @@ from mauditor.core.models import Finding, Severity
 from mauditor.core.rules.registry import Registry
 from mauditor.cli.formatting import hyperlink
 from mauditor.core.report import Report
+from mauditor.config.defaults import get_config
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -167,6 +168,7 @@ def print_summary(
 def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
+    config = get_config()
 
     if args.rules:
         print_rules()
@@ -197,9 +199,10 @@ def main() -> int:
 
     scan_duration = perf_counter() - start_time
 
-    print_summary(findings, scan_duration)
+    if config.get("output", {}).get("show_summary", True):
+        print_summary(findings, scan_duration)
 
-    if not args.noreport:
+    if not args.noreport and config.get("report", {}).get("enabled", True):
         report = Report(
             findings=findings,
             scan_duration=scan_duration,

@@ -17,10 +17,6 @@ def validate_scanner(scanner: dict) -> None:
     if not isinstance(scanner, dict):
         raise TypeError("'scanner' must be a table.")
 
-    if "recursive" in scanner:
-        if not isinstance(scanner["recursive"], bool):
-            raise TypeError("'scanner.recursive' must be a boolean.")
-
     if "exclude" in scanner:
         if not isinstance(scanner["exclude"], list):
             raise TypeError("'scanner.exclude' must be a list.")
@@ -33,7 +29,7 @@ def validate_rules(rules: dict) -> None:
     if not isinstance(rules, dict):
         raise TypeError("'rules' must be a table.")
 
-    for key in ("enabled", "disabled"):
+    for key in ("enabled"):
         if key in rules:
             if not isinstance(rules[key], list):
                 raise TypeError(f"'rules.{key}' must be a list.")
@@ -62,10 +58,6 @@ def validate_report(report: dict) -> None:
     if "enabled" in report:
         if not isinstance(report["enabled"], bool):
             raise TypeError("'report.enabled' must be a boolean.")
-
-    if "format" in report:
-        if report["format"] not in ("json",):
-            raise ValueError("'report.format' must be 'json'.")
 
     if "output" in report:
         if not isinstance(report["output"], str):

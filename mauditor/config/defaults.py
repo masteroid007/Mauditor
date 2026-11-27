@@ -2,11 +2,11 @@
 import tomllib
 
 from mauditor.config.loader import CONFIG_DIR, CONFIG_PATH
+from mauditor.config.validator import validate_config
 
 
 DEFAULT_CONFIG = """\
 [scanner]
-recursive = true
 exclude = [
     "__pycache__",
     ".venv",
@@ -15,22 +15,21 @@ exclude = [
 ]
 
 [rules]
-enabled = []
 disabled = []
 
 [severity]
 minimum = "LOW"
 
 [report]
-enabled = true
-format = "json"
+enabled = True
 output = "reports/report.json"
 
 [output]
-colors = true
-show_summary = true
+colors = True
+show_summary = True 
 """
-
+# summary fatto
+# report fatto
 
 def get_config() -> dict:
     if not CONFIG_PATH.exists():
@@ -38,4 +37,8 @@ def get_config() -> dict:
         CONFIG_PATH.write_text(DEFAULT_CONFIG, encoding="utf-8")
 
     with CONFIG_PATH.open("rb") as file:
-        return tomllib.load(file)
+        config = tomllib.load(file)
+    
+    validate_config(config)
+    return config
+    
