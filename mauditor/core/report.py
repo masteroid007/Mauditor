@@ -37,6 +37,7 @@ class Report:
             if hasattr(finding.severity, "name")
             else str(finding.severity)
             for finding in self.findings
+            if finding.rule_id not in get_config().get("rules", {}).get("disabled", [])
         )
 
         summary = {

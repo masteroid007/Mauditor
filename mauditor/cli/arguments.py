@@ -190,10 +190,10 @@ def print_summary(
         log.pink("  SCAN SUMMARY")
         log("=" * 60)
 
-        total = len(findings)
+        total = len([findings for i in range(len(findings)) if findings[i].rule_id not in config.get("rules", {}).get("disabled", [])])
         log(f"Total findings: {total}")
 
-        counts = Counter(finding.severity for finding in findings)
+        counts = Counter(finding.severity for finding in findings if finding.rule_id not in get_config().get("rules", {}).get("disabled", []))
 
         for severity in Severity:
             count = counts.get(severity, 0)
@@ -287,14 +287,15 @@ def main() -> int:
     findings = Auditor().run(target)
 
     for index, finding in enumerate(findings, start=1):
-        if config.get("severity", {}).get("minimum", "LOW"):
-            print_finding(index, finding)
-        elif config.get("severity", {}).get("minimum", "MEDIUM") and str(finding.severity) in ["MEDIUM", "HIGH", "CRITICAL"]:
-            print_finding(index, finding)
-        elif config.get("severity", {}).get("minimum", "HIGH") and str(finding.severity) in ["HIGH", "CRITICAL"]:
-            print_finding(index, finding)
-        elif config.get("severity", {}).get("minimum", "CRITICAL") and str(finding.severity) in ["CRITICAL"]:
-            print_finding(index, finding)
+        if config.get("rules", {}).get("disabled", []) and finding.rule_id not in config.get("rules", {}).get("disabled"):
+            if config.get("severity", {}).get("minimum", "LOW"):
+                print_finding(index, finding)
+            elif config.get("severity", {}).get("minimum", "MEDIUM") and str(finding.severity) in ["MEDIUM", "HIGH", "CRITICAL"]:
+                print_finding(index, finding)
+            elif config.get("severity", {}).get("minimum", "HIGH") and str(finding.severity) in ["HIGH", "CRITICAL"]:
+                print_finding(index, finding)
+            elif config.get("severity", {}).get("minimum", "CRITICAL") and str(finding.severity) in ["CRITICAL"]:
+                print_finding(index, finding)
 
     scan_duration = perf_counter() - start_time
 
