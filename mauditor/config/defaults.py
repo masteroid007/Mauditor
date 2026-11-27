@@ -20,8 +20,6 @@ output = "reports/report.json"
 colors = true
 show_summary = true
 """
-# output fatto
-# report fatto
 
 def get_config() -> dict:
     if not CONFIG_PATH.exists():
