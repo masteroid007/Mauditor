@@ -1,9 +1,6 @@
 # Python
 __pycache__/
-*.py[cod]
 *.egg-info/
-dist/
-build/
 
 # Virtual environments
 .venv/
@@ -16,7 +13,6 @@ htmlcov/
 
 # IDE
 .vscode/
-.idea/
 
 # Environment variables and secrets
 .env
@@ -25,9 +21,5 @@ htmlcov/
 
 # Generated reports
 reports/
-
-prova.py
-
-to-do.md
 
 tests/
